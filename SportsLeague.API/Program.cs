@@ -1,23 +1,48 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.EntityFrameworkCore;
+using SportsLeague.DataAccess.Context;
+using SportsLeague.DataAccess.Repositories;
+using SportsLeague.Domain.Interfaces.Repositories;
+using SportsLeague.Domain.Interfaces.Services;
+using SportsLeague.Domain.Services;
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+public partial class Program
 {
-    app.MapOpenApi();
+    private static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        // ── Entity Framework Core ──
+
+        builder.Services.AddDbContext<LeagueDbContext>(options =>
+        options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+        // ── Repositories ──
+        builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+        // ── Services ──
+        builder.Services.AddScoped<ITeamService, TeamService>();
+        // ── AutoMapper ──
+        builder.Services.AddAutoMapper(typeof(Program).Assembly);
+        // ── Controllers ──
+        builder.Services.AddControllers();
+        // ── Swagger ──
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        var app = builder.Build();
+        // ── Middleware Pipeline ──
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+        app.MapGet("/", () => Results.Redirect("/swagger"));
+        app.UseHttpsRedirection();
+        app.UseAuthorization();
+        app.MapControllers();
+
+
+        app.Run();
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
