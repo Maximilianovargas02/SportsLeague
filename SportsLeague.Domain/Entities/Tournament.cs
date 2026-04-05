@@ -1,8 +1,6 @@
 ﻿using SportsLeague.Domain.Enums;
-
 namespace SportsLeague.Domain.Entities;
 public class Tournament : AuditBase
-
 {
     public string Name { get; set; } = string.Empty;
     public string Season { get; set; } = string.Empty;
@@ -11,7 +9,6 @@ public class Tournament : AuditBase
     public TournamentStatus Status { get; set; } = TournamentStatus.Pending;
 
     // Navigation Properties
-
     public ICollection<TournamentTeam> TournamentTeams { get; set; } = new List<TournamentTeam>();
-
+    public ICollection<TournamentSponsor> TournamentSponsors { get; set; } = new List<TournamentSponsor>();
 }
