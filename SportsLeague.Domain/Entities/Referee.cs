@@ -10,5 +10,5 @@ public class Referee : AuditBase
     public string LastName { get; set; } = string.Empty;
 
     public string Nationality { get; set; } = string.Empty;
-
+    public ICollection<Match> Matches { get; set; } = new List<Match>();
 }
