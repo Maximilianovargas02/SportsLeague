@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.DataAccess.Repositories;
+using SportsLeague.Domain.Helpers;
 using SportsLeague.Domain.Interfaces.Repositories;
 using SportsLeague.Domain.Interfaces.Services;
 using SportsLeague.Domain.Services;
-
+using SportsLeague.DataAccess.Seeders;
 public partial class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,9 @@ public partial class Program
         builder.Services.AddScoped<ISponsorRepository, SponsorRepository>();
         builder.Services.AddScoped<ITournamentSponsorRepository, TournamentSponsorRepository>();
         builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+        builder.Services.AddScoped<IMatchResultRepository, MatchResultRepository>();
+        builder.Services.AddScoped<IGoalRepository, GoalRepository>();
+        builder.Services.AddScoped<ICardRepository, CardRepository>();
 
         // ── Services ──
         builder.Services.AddScoped<ITeamService, TeamService>();
@@ -37,6 +41,8 @@ public partial class Program
         builder.Services.AddScoped<ITournamentService, TournamentService>();
         builder.Services.AddScoped<ISponsorService, SponsorService>();
         builder.Services.AddScoped<IMatchService, MatchService>();
+        builder.Services.AddScoped<IMatchEventService, MatchEventService>();
+        builder.Services.AddScoped<MatchValidationHelper>();
         // ── AutoMapper ──
         builder.Services.AddAutoMapper(typeof(Program).Assembly);
         // ── Controllers ──
@@ -45,6 +51,21 @@ public partial class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         var app = builder.Build();
+
+        // ── Data Seeder ── 
+        using (var scope = app.Services.CreateScope())
+
+        {
+
+            var context = scope.ServiceProvider
+
+                .GetRequiredService<LeagueDbContext>();
+
+            await context.Database.MigrateAsync(); // Crea la BD + aplica migraciones 
+
+            await DataSeeder.SeedAsync(context);
+
+        }
         // ── Middleware Pipeline ──
         if (app.Environment.IsDevelopment())
         {
@@ -57,6 +78,6 @@ public partial class Program
         app.MapControllers();
 
 
-        app.Run();
+       app.Run();
     }
 }
