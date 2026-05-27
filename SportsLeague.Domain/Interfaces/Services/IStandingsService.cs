@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SportsLeague.Domain.Interfaces.Services
+﻿namespace SportsLeague.Domain.Interfaces.Services;
+public interface IStandingsService
 {
-    internal interface IStandingsService
-    {
-    }
+    Task<object> GetStandingsAsync(int tournamentId);
+    Task<object> GetTopScorersAsync(int tournamentId);
+    Task<object> GetCardStatsAsync(int tournamentId);
 }
